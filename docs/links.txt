@@ -1,0 +1,7 @@
+http://www.acgeospatial.co.uk/stac-cog-python-and-qgis/
+https://github.com/cirrus-geo/cirrus-earth-search
+http://www.acgeospatial.co.uk/
+http://www.acgeospatial.co.uk/sentinelsat_demo/
+https://towardsdatascience.com/reading-and-visualizing-geotiff-images-with-python-8dcca7a74510
+https://www.earthdatascience.org/courses/use-data-open-source-python/intro-vector-data-python/spatial-data-vector-shapefiles/geographic-vs-projected-coordinate-reference-systems-python/
+https://pyproj4.github.io/pyproj/stable/api/transformer.html#pyproj.transformer.Transformer
