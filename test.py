@@ -13,9 +13,10 @@ print(img.count)
 print(img.width, img.height)
 print(img.crs)
 
+
 # rs.windows.from_bounds(left=-54.5,bottom=-15.5,right=-54, top=-15, transform=img.transform)
 
-
+print("")
 #
 # xrtest = xr.open_rasterio(fp)
 # print("")
