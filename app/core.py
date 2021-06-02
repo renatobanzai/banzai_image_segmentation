@@ -51,7 +51,6 @@ class Image:
             for column in range(columns):
                 image_matrix[line, column] = equalization_values[image_matrix[line, column]]
 
-        self.show_histogram(image_matrix)
         cv2.imshow("imagem", image_matrix)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
@@ -263,23 +262,7 @@ class Image:
 
 if __name__ == '__main__':
     sys.setrecursionlimit(5000)
-    #img = Image("4objetos.bmp")
-    #img.get_object_qty(img.image_matrix, 255)
-
-    #img = Image("bird.png")
-    #img.edges_and_links(img.image_matrix, 30, 1.4)
-
-    img = Image("tci32_.tif")
-    img.edges_and_links(img.image_matrix, 30, 1.4)
-
-    #img = Image("horizontal.bmp")
-
-    # img = Image("horizontal.bmp")
-    # img.print_line_type(img.image_matrix)
-    #
-    # img = Image("inclinada.bmp")
-    # img.print_line_type(img.image_matrix)
-    #
-    # img = Image("vertical.bmp")
-    # img.print_line_type(img.image_matrix)
+    img = Image("../data/talhao_100767/tci20201010_interest_area.png")
+    img.equalization_filter(img.image_matrix)
+    #img.edges_and_links(img.image_matrix, 5, 1.4)
 
