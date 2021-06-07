@@ -6,44 +6,52 @@ import xarray as xr
 import matplotlib.pyplot as plt
 from pyproj import Transformer, CRS
 import cv2
-
+import os
 
 def interest_area(image_path, lat, long, square_width):
     #image_path = r'./data/talhao_101035/tci20201010.tif'
-    rs_img = rs.open(image_path)
-    cv_img = cv2.imread(image_path)
+    with rs.open(image_path) as rs_img:
 
-    crs_img = CRS.from_user_input(rs.crs.CRS(rs_img.crs))
-    crs_WSG84 = CRS("WGS84")
-    coord_transformer = Transformer.from_crs(crs_from=crs_WSG84, crs_to=crs_img)
-    res = coord_transformer.transform(long, lat)
+        crs_img = CRS.from_user_input(rs.crs.CRS(rs_img.crs))
+        crs_WSG84 = CRS("WGS84")
+        coord_transformer = Transformer.from_crs(crs_from=crs_WSG84, crs_to=crs_img)
+        res = coord_transformer.transform(long, lat)
 
-    x = res[0]
-    y = res[1]
+        x = res[0]
+        y = res[1]
 
-    x_factor = rs_img.width / (rs_img.bounds.right - rs_img.bounds.left)
-    y_factor = rs_img.height / (rs_img.bounds.top - rs_img.bounds.bottom)
+        x_factor = rs_img.width / (rs_img.bounds.right - rs_img.bounds.left)
+        y_factor = rs_img.height / (rs_img.bounds.top - rs_img.bounds.bottom)
 
-    x_proj = (x - rs_img.bounds.left) * x_factor
-    y_proj = (rs_img.bounds.top - y ) * y_factor
+        x_proj = (x - rs_img.bounds.left) * x_factor
+        y_proj = (rs_img.bounds.top - y ) * y_factor
 
-    win_interest = Window(col_off=x_proj - (square_width / 2),
-                          row_off=y_proj - (square_width / 2),
-                          width=square_width,
-                          height=square_width)
+        win_interest = Window(col_off=x_proj - (square_width / 2),
+                              row_off=y_proj - (square_width / 2),
+                              width=square_width,
+                              height=square_width)
 
-    win_result = rs_img.read(window=win_interest)
-    show(win_result)
-    print("")
+        new_profile = rs_img.profile
+        new_profile["width"] = square_width
+        new_profile["height"] = square_width
+
+        win_result = rs_img.read(window=win_interest)
+        #show(win_result)
+
+
+        with rs.open(os.path.split(image_path)[0] + "/interest_"+ os.path.split(image_path)[1], 'w', **rs_img.profile) as dst:
+            dst.write(rs_img.read(window=win_interest))
+
+        print("")
     return win_result
 
 # rs.windows.from_bounds(left=-54.5,bottom=-15.5,right=-54, top=-15, transform=img.transform)
 
 # talhão 101035
-talhao_101035 = interest_area(r'./data/talhao_101035/tci20201015.tif', -54.521091,-15.24826, 500)
+talhao_101035 = interest_area(r'./data/talhao_101035/b0820201015.tif', -54.521091,-15.24826, 500)
 
 # talhão 100767
-talhao_100767 = interest_area(r'./data/talhao_101035/tci20201015.tif', -54.773159, -15.228314, 500)
+#talhao_100767 = interest_area(r'./data/talhao_101035/tci20201015.tif', -54.773159, -15.228314, 500)
 
 
 
