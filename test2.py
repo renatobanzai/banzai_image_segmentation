@@ -6,70 +6,56 @@ import xarray as xr
 import matplotlib.pyplot as plt
 from pyproj import Transformer, CRS
 import cv2
+import sys
+sys.setrecursionlimit(25000)
+
+def find_object(seed, image_matrix, object_list):
+    background_color = 255
+    line_ini = seed[0] - 1
+    line_end = line_ini + 3
+
+    col_ini = seed[1] - 1
+    col_end = col_ini + 3
+    object_list[seed] = True
+    for line in range(line_ini, line_end):
+        for column in range(col_ini, col_end):
+            if column != seed[1] or line != seed[0]:
+                if (line, column) not in object_list.keys():
+                    if image_matrix[line][column] < 255:
+                        find_object((line, column), image_matrix, object_list)
+    return object_list
 
 
-def interest_area(image_path, lat, long, square_width):
-    #image_path = r'./data/talhao_101035/tci20201010.tif'
-    rs_img = rs.open(image_path)
-    cv_img = cv2.imread(image_path)
+img = cv2.imread("./data/talhao_101035/interest_b0420201015.tif", -1)
 
-    crs_img = CRS.from_user_input(rs.crs.CRS(rs_img.crs))
-    crs_WSG84 = CRS("WGS84")
-    coord_transformer = Transformer.from_crs(crs_from=crs_WSG84, crs_to=crs_img)
-    res = coord_transformer.transform(long, lat)
+img8 = cv2.convertScaleAbs(img, alpha=0.03)
+img_eq = cv2.equalizeHist(img8)
+img_blur = cv2.GaussianBlur(img8, (5,5), 0 )
+img_lap = cv2.Laplacian(img8, cv2.CV_64F)
+img_lap = np.uint8(np.absolute(img_lap))
+#plt.imshow(img8,cmap = 'gray')
 
-    x = res[0]
-    y = res[1]
+plt.imshow(img_lap,cmap = 'gray')
+plt.show()
 
-    x_factor = rs_img.width / (rs_img.bounds.right - rs_img.bounds.left)
-    y_factor = rs_img.height / (rs_img.bounds.top - rs_img.bounds.bottom)
-
-    x_proj = (x - rs_img.bounds.left) * x_factor
-    y_proj = (rs_img.bounds.top - y ) * y_factor
-
-    win_interest = Window(col_off=x_proj - (square_width / 2),
-                          row_off=y_proj - (square_width / 2),
-                          width=square_width,
-                          height=square_width)
-
-    win_result = rs_img.read(window=win_interest)
-    show(win_result)
-    print("")
-    return win_result
-
-# rs.windows.from_bounds(left=-54.5,bottom=-15.5,right=-54, top=-15, transform=img.transform)
-
-#img = cv2.imread("./data/talhao_101035/tci20201015_interest_area.png", 0)
-#img = cv2.imread("./data/talhao_101035/ndvi.tiff", 0)
-#img = cv2.imread("./data/talhao_100767/tci20201015_interest_area.png", 0)
-img = cv2.imread("./data/talhao_101035/interest_tci20201015.tif", 0)
-edges = cv2.Canny(img,100,200)
+edges = cv2.Canny(img_lap,2,50)
 plt.imshow(edges,cmap = 'gray')
-#plt.imshow(img,cmap = 'gray')
+plt.show()
+
+
+edges = cv2.Canny(img8,10,50)
+plt.imshow(edges,cmap = 'gray')
 plt.show()
 
 
 
 
-#
-# xrtest = xr.open_rasterio(fp)
-# print("")
 
-# fp2 = r'./data/talhao_101035/b0320201010.tif'
-# img2 = rs.open(fp2)
-#
-# print(img2.count)
-# print(img2.width, img2.height)
-# print(img2.crs)
-# show(img2)
+plt.imshow(img_eq,cmap = 'gray')
+edgeseq = cv2.Canny(img_eq,50,200)
+plt.imshow(edgeseq,cmap = 'gray')
+plt.show()
 
-# import georaster
-# import matplotlib.pyplot as plt
-# # Use SingleBandRaster() if image has only one band
-# img = georaster.MultiBandRaster('GeoTiff_Image.tif')
-# # img.r gives the raster in [height, width, band] format
-# # band no. starts from 0
-# plt.imshow(img.r[:,:,2])
 
 
 
