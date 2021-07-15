@@ -5,3 +5,26 @@ http://www.acgeospatial.co.uk/sentinelsat_demo/
 https://towardsdatascience.com/reading-and-visualizing-geotiff-images-with-python-8dcca7a74510
 https://www.earthdatascience.org/courses/use-data-open-source-python/intro-vector-data-python/spatial-data-vector-shapefiles/geographic-vs-projected-coordinate-reference-systems-python/
 https://pyproj4.github.io/pyproj/stable/api/transformer.html#pyproj.transformer.Transformer
+http://www.cmm.mines-paristech.fr/~beucher/publi/P-Algorithm_SB_BM.pdf
+http://www.cmm.mines-paristech.fr/~beucher/publi.html
+http://www.cmm.mines-paristech.fr/~beucher/wtshed.html
+
+
+aws s3 cp s3://sentinel-cogs/sentinel-s2-l2a-cogs/21/L/YF/2020/12/S2B_21LYF_20201229_0_L2A/B08.tif ./b0820201229.tif --no-sign-request
+aws s3 cp s3://sentinel-cogs/sentinel-s2-l2a-cogs/21/L/YF/2020/12/S2B_21LYF_20201229_0_L2A/B04.tif ./b0420201229.tif --no-sign-request
+aws s3 cp s3://sentinel-cogs/sentinel-s2-l2a-cogs/21/L/YF/2020/12/S2A_21LYF_20201217_0_L2A/TCI.tif ./tci20201217.tif --no-sign-request
+aws s3 cp s3://sentinel-cogs/sentinel-s2-l2a-cogs/21/L/YF/2020/12/S2A_21LYF_20201217_0_L2A/B08.tif ./b0820201217.tif --no-sign-request
+aws s3 cp s3://sentinel-cogs/sentinel-s2-l2a-cogs/21/L/YF/2020/12/S2A_21LYF_20201217_0_L2A/B04.tif ./b0420201217.tif --no-sign-request
+
+aws s3 cp s3://sentinel-cogs/sentinel-s2-l2a-cogs/21/L/WH/2020/10/S2B_21LWH_20201013_0_L2A/TCI.tif ./tci20201013.tif --no-sign-request
+aws s3 cp s3://sentinel-cogs/sentinel-s2-l2a-cogs/21/L/WH/2020/10/S2B_21LWH_20201013_0_L2A/B04.tif ./b0420201013.tif --no-sign-request
+
+aws s3 cp s3://sentinel-cogs/sentinel-s2-l2a-cogs/20/L/RJ/2020/11/S2B_20LRJ_20201105_0_L2A/TCI.tif ./tci20201105.tif --no-sign-request
+aws s3 cp s3://sentinel-cogs/sentinel-s2-l2a-cogs/20/L/RJ/2020/11/S2B_20LRJ_20201105_0_L2A/B04.tif ./b0420201105.tif --no-sign-request
+
+
+
+s3://sentinel-cogs/sentinel-s2-l2a-cogs/21/L/YF/2020/12/S2B_21LYF_20201229_0_L2A/
+s3://sentinel-cogs/sentinel-s2-l2a-cogs/21/L/YF/2020/12/S2A_21LYF_20201227_0_L2A
+s3://sentinel-cogs/sentinel-s2-l2a-cogs/21/L/YF/2020/12/S2A_21LYF_20201227_0_L2A
+s3://sentinel-cogs/sentinel-s2-l2a-cogs/21/L/YF/2020/12/S2A_21LYF_20201217_0_L2A
