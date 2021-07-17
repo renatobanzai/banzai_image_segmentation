@@ -9,6 +9,8 @@ import cv2
 import os
 import numpy as np
 import rasterio as rs
+import fiona
+import rasterio.mask
 from rasterio.plot import show
 from rasterio.windows import Window
 import xarray as xr
@@ -16,6 +18,8 @@ import matplotlib.pyplot as plt
 from pyproj import Transformer, CRS
 import cv2
 import sys
+
+
 sys.setrecursionlimit(25000)
 
 
@@ -59,6 +63,18 @@ def interest_area(image_path, lat, long, square_width):
         print("")
     return win_result
 
+def mask_vector(image_path, vector_path):
+    with fiona.open(vector_path, "r") as shapefile:
+        shapes = [feature["geometry"] for feature in shapefile]
+
+    with rasterio.open(image_path) as src:
+        out_image, out_transform = rasterio.mask.mask(src, shapes)
+        out_meta = src.meta
+
+    show(out_image)
+
+
+
 # rs.windows.from_bounds(left=-54.5,bottom=-15.5,right=-54, top=-15, transform=img.transform)
 
 # talhão 101035
@@ -71,74 +87,76 @@ def interest_area(image_path, lat, long, square_width):
 
 # talhao_102996 = interest_area(r'./data/talhao_102996/b0420201013.tif', -56.0276, -11.74378, 500)
 
-talhao_102939 = interest_area(r'./data/talhao_102939/b0420201105.tif', -59.513273,-14.981855, 500)
+#talhao_102939 = interest_area(r'./data/talhao_102939/b0420201105.tif', -59.513273,-14.981855, 500)
+
+mask_vector("./data/talhao_101035/interest_tci20201015.tif", "./data/talhao_101035/101035.shp.zip")
 
 
 print("")
 
-
-def find_object(seed, image_matrix, object_list):
-    background_color = 255
-    line_ini = seed[0] - 1
-    line_end = line_ini + 3
-
-    col_ini = seed[1] - 1
-    col_end = col_ini + 3
-    object_list[seed] = True
-    for line in range(line_ini, line_end):
-        for column in range(col_ini, col_end):
-            if column != seed[1] or line != seed[0]:
-                if (line, column) not in object_list.keys():
-                    if image_matrix[line][column] < 255:
-                        find_object((line, column), image_matrix, object_list)
-    return object_list
-
-
-img = cv2.imread("./data/talhao_101035/interest_b0420201015.tif", -1)
-
-img8 = cv2.convertScaleAbs(img, alpha=0.03)
-line_image = np.copy(img8) * 0
-img_eq = cv2.equalizeHist(img8)
-img_blur = cv2.GaussianBlur(img8, (5,5), 0 )
-img_lap = cv2.Laplacian(img8, cv2.CV_64F)
-img_lap = np.uint8(np.absolute(img_lap))
-
-plt.imshow(img8,cmap = 'gray')
-
-# plt.imshow(img_lap,cmap = 'gray')
+#
+# def find_object(seed, image_matrix, object_list):
+#     background_color = 255
+#     line_ini = seed[0] - 1
+#     line_end = line_ini + 3
+#
+#     col_ini = seed[1] - 1
+#     col_end = col_ini + 3
+#     object_list[seed] = True
+#     for line in range(line_ini, line_end):
+#         for column in range(col_ini, col_end):
+#             if column != seed[1] or line != seed[0]:
+#                 if (line, column) not in object_list.keys():
+#                     if image_matrix[line][column] < 255:
+#                         find_object((line, column), image_matrix, object_list)
+#     return object_list
+#
+#
+# img = cv2.imread("./data/talhao_101035/interest_b0420201015.tif", -1)
+#
+# img8 = cv2.convertScaleAbs(img, alpha=0.03)
+# line_image = np.copy(img8) * 0
+# img_eq = cv2.equalizeHist(img8)
+# img_blur = cv2.GaussianBlur(img8, (5,5), 0 )
+# img_lap = cv2.Laplacian(img8, cv2.CV_64F)
+# img_lap = np.uint8(np.absolute(img_lap))
+#
+# plt.imshow(img8,cmap = 'gray')
+#
+# # plt.imshow(img_lap,cmap = 'gray')
+# # plt.show()
+# #
+# edges = cv2.Canny(img8,10,50)
+# plt.imshow(edges,cmap = 'gray')
 # plt.show()
+# #
+# # plt.imshow(img_eq,cmap = 'gray')
+# # edgeseq = cv2.Canny(img_eq,50,200)
+# # plt.imshow(edgeseq,cmap = 'gray')
+# # plt.show()
 #
-edges = cv2.Canny(img8,10,50)
-plt.imshow(edges,cmap = 'gray')
-plt.show()
 #
-# plt.imshow(img_eq,cmap = 'gray')
-# edgeseq = cv2.Canny(img_eq,50,200)
-# plt.imshow(edgeseq,cmap = 'gray')
-# plt.show()
-
-
-
-
 #
-# xrtest = xr.open_rasterio(fp)
-# print("")
-
-# fp2 = r'./data/talhao_101035/b0320201010.tif'
-# img2 = rs.open(fp2)
 #
-# print(img2.count)
-# print(img2.width, img2.height)
-# print(img2.crs)
-# show(img2)
-
-# import georaster
-# import matplotlib.pyplot as plt
-# # Use SingleBandRaster() if image has only one band
-# img = georaster.MultiBandRaster('GeoTiff_Image.tif')
-# # img.r gives the raster in [height, width, band] format
-# # band no. starts from 0
-# plt.imshow(img.r[:,:,2])
-
-
-
+# #
+# # xrtest = xr.open_rasterio(fp)
+# # print("")
+#
+# # fp2 = r'./data/talhao_101035/b0320201010.tif'
+# # img2 = rs.open(fp2)
+# #
+# # print(img2.count)
+# # print(img2.width, img2.height)
+# # print(img2.crs)
+# # show(img2)
+#
+# # import georaster
+# # import matplotlib.pyplot as plt
+# # # Use SingleBandRaster() if image has only one band
+# # img = georaster.MultiBandRaster('GeoTiff_Image.tif')
+# # # img.r gives the raster in [height, width, band] format
+# # # band no. starts from 0
+# # plt.imshow(img.r[:,:,2])
+#
+#
+#
