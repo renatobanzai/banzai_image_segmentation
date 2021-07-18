@@ -68,12 +68,54 @@ def mask_vector(image_path, vector_path):
         shapes = [feature["geometry"] for feature in shapefile]
 
     with rasterio.open(image_path) as src:
-        out_image, out_transform = rasterio.mask.mask(src, shapes)
+        out_image, out_transform = rasterio.mask.mask(src, shapes, invert=True, filled=True)
         out_meta = src.meta
+        kwargs = out_meta
 
     show(out_image)
 
+    with rs.open(os.path.split(image_path)[0] + "/ground_truth_" + os.path.split(image_path)[1], 'w', **kwargs) as dst:
+        dst.write(out_image)
 
+
+def find_object(seed, image_matrix, object_list):
+    background_color = 255
+    line_ini = seed[0] - 1
+    line_end = line_ini + 3
+
+    col_ini = seed[1] - 1
+    col_end = col_ini + 3
+    object_list[seed] = True
+    for line in range(line_ini, line_end):
+        for column in range(col_ini, col_end):
+            if column != seed[1] or line != seed[0]:
+                if (line, column) not in object_list.keys():
+                    if image_matrix[line][column] == 0:
+                        find_object((line, column), image_matrix, object_list)
+    return object_list
+
+def segment_img(img_src_path):
+    img_source = cv2.imread(img_src_path, 0)
+    img_result = np.copy(img_source) * 0
+    obj = {}
+    object_list = find_object((250,250), img_source, obj)
+    for key in obj.keys():
+        img_result[key[0], key[1]] = 1
+
+    show(img_result)
+    cv2.imwrite(os.path.split(img_src_path)[0] + "/seg_" + os.path.split(img_src_path)[1], img_result)
+
+    return ""
+
+def calc_IoU(ground_truth_src_path, result_src_path):
+    img_ground_truth = cv2.imread(ground_truth_src_path, 0)
+    img_result_path = cv2.imread(result_src_path, 0)
+
+    intersection = np.logical_and(img_ground_truth, img_result_path)
+    union = np.logical_or(img_ground_truth, img_result_path)
+    result = np.sum(intersection) / np.sum(union)
+    print(result)
+    return result
 
 # rs.windows.from_bounds(left=-54.5,bottom=-15.5,right=-54, top=-15, transform=img.transform)
 
@@ -89,27 +131,27 @@ def mask_vector(image_path, vector_path):
 
 #talhao_102939 = interest_area(r'./data/talhao_102939/b0420201105.tif', -59.513273,-14.981855, 500)
 
-mask_vector("./data/talhao_101035/interest_tci20201015.tif", "./data/talhao_101035/101035.shp.zip")
+#mask_vector("./data/talhao_101035/interest_tci20201015.tif", "./data/talhao_101035/101035.shp.zip")
+#mask_vector("./data/talhao_103330/interest_tci20201217.tif", "./data/talhao_103330/103330.shp.zip")
+#mask_vector("./data/talhao_102939/interest_tci20201105.tif", "./data/talhao_102939/102939.shp.zip")
 
+calc_IoU("./data/talhao_101035/seg_ground_truth_interest_tci20201015.tif", "./data/talhao_101035/seg_result.tif")
+calc_IoU("./data/talhao_103330/seg_ground_truth_interest_tci20201217.tif", "./data/talhao_103330/seg_result.tif")
+
+
+
+# segment_img("./data/talhao_101035/result.tif")
+# segment_img("./data/talhao_101035/ground_truth_interest_tci20201015.tif")
+#
+# segment_img("./data/talhao_103330/result.tif")
+# segment_img("./data/talhao_103330/ground_truth_interest_tci20201217.tif")
+#
+# segment_img("./data/talhao_102939/result.tif")
 
 print("")
 
 #
-# def find_object(seed, image_matrix, object_list):
-#     background_color = 255
-#     line_ini = seed[0] - 1
-#     line_end = line_ini + 3
-#
-#     col_ini = seed[1] - 1
-#     col_end = col_ini + 3
-#     object_list[seed] = True
-#     for line in range(line_ini, line_end):
-#         for column in range(col_ini, col_end):
-#             if column != seed[1] or line != seed[0]:
-#                 if (line, column) not in object_list.keys():
-#                     if image_matrix[line][column] < 255:
-#                         find_object((line, column), image_matrix, object_list)
-#     return object_list
+
 #
 #
 # img = cv2.imread("./data/talhao_101035/interest_b0420201015.tif", -1)
