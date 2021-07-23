@@ -97,6 +97,42 @@ def find_object(seed, image_matrix, object_list):
                         find_object((line, column), image_matrix, object_list)
     return object_list
 
+def find_object_kernel(seed, image_matrix, object_list):
+    m_img = image_matrix[seed[0]-1:seed[0]+2,seed[1]-1:seed[1]+2]
+    object_list[seed] = True
+
+    k1 = np.array([[0,1,0],[0,0,1],[0,0,0]])
+    k2 = np.array([[0,1,0],[1,0,0],[0,0,0]])
+    k3 = np.array([[0,0,0],[0,0,1],[0,1,0]])
+    k4 = np.array([[0,0,0],[1,0,0],[0,1,0]])
+
+    remove = []
+    if ((m_img * k1).sum() > 250):
+        remove.append((seed[0]-1, seed[1]+1))
+
+    if ((m_img * k2).sum() > 250):
+        remove.append((seed[0]-1, seed[1]-1))
+
+    if ((m_img * k3).sum() > 250):
+        remove.append((seed[0]+1, seed[1]+1))
+
+    if ((m_img * k4).sum() > 250):
+        remove.append((seed[0]+1, seed[1]-1))
+
+    line_ini = seed[0] - 1
+    line_end = line_ini + 3
+
+    col_ini = seed[1] - 1
+    col_end = col_ini + 3
+
+    for line in range(line_ini, line_end):
+        for column in range(col_ini, col_end):
+            if column != seed[1] or line != seed[0]:
+                if (line, column) not in object_list.keys() and (line, column) not in remove:
+                    if image_matrix[line][column] == 0:
+                        find_object_kernel((line, column), image_matrix, object_list)
+    return object_list
+
 def segment_img(img_src_path):
     img_source = cv2.imread(img_src_path, 0)
     for i in range(500):
@@ -107,7 +143,7 @@ def segment_img(img_src_path):
 
     img_result = np.copy(img_source) * 0
     obj = {}
-    object_list = find_object((250,250), img_source, obj)
+    object_list = find_object_kernel((250,250), img_source, obj)
     for key in obj.keys():
         img_result[key[0], key[1]] = 1
 
@@ -167,13 +203,20 @@ def calc_IoU(ground_truth_src_path, result_src_path):
 # precision 0.9904921115870859
 # recall 0.9556451612903226
 # f1 0.9727566569185778
-#
+
 # calc_IoU("./data/talhao_101035/seg_ground_truth_interest_tci20201015.tif", "./data/talhao_101035/seg_result_hough.tif")
 # iou 0.332661087022285
 # accuracy 0.947056
 # precision 0.39958817829457366
 # recall 0.6651209677419355
 # f1 0.49924334140435833
+
+# calc_IoU("./data/talhao_101035/seg_ground_truth_interest_tci20201015.tif", "./data/talhao_101035/seg_result_hough_grid.tif")
+# iou 0.7625
+# accuracy 0.990576
+# precision 1.0
+# recall 0.7625
+# f1 0.8652482269503545
 
 # calc_IoU("./data/talhao_103330/seg_ground_truth_interest_tci20201217.tif", "./data/talhao_103330/seg_result.tif")
 # iou 0.9571577071577072
@@ -189,6 +232,13 @@ def calc_IoU(ground_truth_src_path, result_src_path):
 # recall 0.9270763500931098
 # f1 0.9621584012987515
 
+# calc_IoU("./data/talhao_103330/seg_ground_truth_interest_tci20201217.tif", "./data/talhao_103330/seg_result_hough_grid.tif")
+# iou 0.8524212715389186
+# accuracy 0.992052
+# precision 0.9966134074331365
+# recall 0.8548975791433892
+# f1 0.9203319834810152
+
 # calc_IoU("./data/talhao_102939/seg_ground_truth_interest_b0420201105.tif", "./data/talhao_102939/result.tif")
 # iou 0.024108
 # accuracy 0.024108
@@ -203,18 +253,26 @@ def calc_IoU(ground_truth_src_path, result_src_path):
 # recall 0.00016592002654720425
 # f1 0.0003317850033178501
 
+# calc_IoU("./data/talhao_102939/seg_ground_truth_interest_b0420201105.tif", "./data/talhao_102939/seg_result_hough_grid.tif")
+# iou 0.00016592002654720425
+# accuracy 0.975896
+# precision 1.0
+# recall 0.00016592002654720425
+# f1 0.0003317850033178501
 
-
+# segment_img("./data/talhao_101035/result_hough_grid.tif")
 # segment_img("./data/talhao_101035/result_hough.tif")
 # segment_img("./data/talhao_101035/result.tif")
 # segment_img("./data/talhao_101035/ground_truth_interest_tci20201015.tif")
 #
 # segment_img("./data/talhao_103330/result_hough.tif")
+# segment_img("./data/talhao_103330/result_hough_grid.tif")
 # segment_img("./data/talhao_103330/result.tif")
 # segment_img("./data/talhao_103330/ground_truth_interest_tci20201217.tif")
 #
 # segment_img("./data/talhao_102939/result.tif")
 # segment_img("./data/talhao_102939/result_hough.tif")
+# segment_img("./data/talhao_102939/result_hough_grid.tif")
 # segment_img("./data/talhao_102939/ground_truth_interest_b0420201105.tif")
 
 print("")
