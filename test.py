@@ -20,7 +20,7 @@ import cv2
 import sys
 
 
-sys.setrecursionlimit(25000)
+sys.setrecursionlimit(50000)
 
 
 def interest_area(image_path, lat, long, square_width):
@@ -78,6 +78,8 @@ def mask_vector(image_path, vector_path):
         dst.write(out_image)
 
 
+count = 0
+
 def find_object(seed, image_matrix, object_list):
     background_color = 255
     line_ini = seed[0] - 1
@@ -91,11 +93,18 @@ def find_object(seed, image_matrix, object_list):
             if column != seed[1] or line != seed[0]:
                 if (line, column) not in object_list.keys():
                     if image_matrix[line][column] == 0:
+                        # object_list[-1] += 1
                         find_object((line, column), image_matrix, object_list)
     return object_list
 
 def segment_img(img_src_path):
     img_source = cv2.imread(img_src_path, 0)
+    for i in range(500):
+        img_source[0,i] = 1
+        img_source[499, i] = 1
+        img_source[i, 0] = 1
+        img_source[i, 499] = 1
+
     img_result = np.copy(img_source) * 0
     obj = {}
     object_list = find_object((250,250), img_source, obj)
@@ -113,17 +122,34 @@ def calc_IoU(ground_truth_src_path, result_src_path):
 
     intersection = np.logical_and(img_ground_truth, img_result_path)
     union = np.logical_or(img_ground_truth, img_result_path)
-    result = np.sum(intersection) / np.sum(union)
-    print(result)
-    return result
+    iou = np.sum(intersection) / np.sum(union)
+    accuracy = (img_result_path==img_ground_truth).sum()/250000
+    true_positives = ((img_result_path==1) & (img_ground_truth==1)).sum()
+    false_positives = ((img_result_path==1) & (img_ground_truth==0)).sum()
+    false_negatives = ((img_result_path==0) & (img_ground_truth==1)).sum()
+
+    precision = true_positives / (true_positives + false_positives)
+    recall = true_positives / (true_positives + false_negatives)
+    f1 = 2 * ((precision * recall) / (precision + recall))
+    print("iou", iou)
+    print("accuracy", accuracy)
+    print("precision", precision)
+    print("recall", recall)
+    print("f1", f1)
+    return iou
 
 # rs.windows.from_bounds(left=-54.5,bottom=-15.5,right=-54, top=-15, transform=img.transform)
 
+# talhao_101035 = interest_area(r'./data/machine_learning/tci_pivot.tif', -54.456796,-15.382209, 500)
+# talhao_101035 = interest_area(r'./data/machine_learning/b04_pivot.tif', -54.456796,-15.382209, 500)
+# talhao_101035 = interest_area(r'./data/machine_learning/b08_pivot.tif', -54.456796,-15.382209, 500)
+
+
 # talhão 101035
-#talhao_101035 = interest_area(r'./data/talhao_101035/b0420201015.tif', -54.521091,-15.24826, 500)
+#talhao_101035 = interest_area(r'./data/talhao_101035/b04.tif', -54.521091,-15.24826, 500)
 
 # talhão 100767
-# talhao_100767 = interest_area(r'./data/talhao_100767/b0820201015.tif', -54.773159, -15.228314, 500)
+# talhao_100767 = interest_area(r'./data/talhao_100767/b08.tif', -54.773159, -15.228314, 500)
 
 #talhao_103330 = interest_area(r'./data/talhao_103330/b0420201217.tif', -54.93358, -13.25332, 500)
 
@@ -133,20 +159,63 @@ def calc_IoU(ground_truth_src_path, result_src_path):
 
 #mask_vector("./data/talhao_101035/interest_tci20201015.tif", "./data/talhao_101035/101035.shp.zip")
 #mask_vector("./data/talhao_103330/interest_tci20201217.tif", "./data/talhao_103330/103330.shp.zip")
-#mask_vector("./data/talhao_102939/interest_tci20201105.tif", "./data/talhao_102939/102939.shp.zip")
+#mask_vector("./data/talhao_102939/interest_b0420201105.tif", "./data/talhao_102939/102939.shp.zip")
 
-calc_IoU("./data/talhao_101035/seg_ground_truth_interest_tci20201015.tif", "./data/talhao_101035/seg_result.tif")
-calc_IoU("./data/talhao_103330/seg_ground_truth_interest_tci20201217.tif", "./data/talhao_103330/seg_result.tif")
+# calc_IoU("./data/talhao_101035/seg_ground_truth_interest_tci20201015.tif", "./data/talhao_101035/seg_result.tif")
+# iou 0.9469583458195985
+# accuracy 0.997876
+# precision 0.9904921115870859
+# recall 0.9556451612903226
+# f1 0.9727566569185778
+#
+# calc_IoU("./data/talhao_101035/seg_ground_truth_interest_tci20201015.tif", "./data/talhao_101035/seg_result_hough.tif")
+# iou 0.332661087022285
+# accuracy 0.947056
+# precision 0.39958817829457366
+# recall 0.6651209677419355
+# f1 0.49924334140435833
+
+# calc_IoU("./data/talhao_103330/seg_ground_truth_interest_tci20201217.tif", "./data/talhao_103330/seg_result.tif")
+# iou 0.9571577071577072
+# accuracy 0.997692
+# precision 0.9966754291015927
+# recall 0.9602234636871508
+# f1 0.9781099434728175
+
+# calc_IoU("./data/talhao_103330/seg_ground_truth_interest_tci20201217.tif", "./data/talhao_103330/seg_result_hough.tif")
+# iou 0.9270763500931098
+# accuracy 0.996084
+# precision 1.0
+# recall 0.9270763500931098
+# f1 0.9621584012987515
+
+# calc_IoU("./data/talhao_102939/seg_ground_truth_interest_b0420201105.tif", "./data/talhao_102939/result.tif")
+# iou 0.024108
+# accuracy 0.024108
+# precision 0.024108
+# recall 1.0
+# f1 0.04708097192874189
+
+# calc_IoU("./data/talhao_102939/seg_ground_truth_interest_b0420201105.tif", "./data/talhao_102939/seg_result_hough.tif")
+# iou 0.00016592002654720425
+# accuracy 0.975896
+# precision 1.0
+# recall 0.00016592002654720425
+# f1 0.0003317850033178501
 
 
 
+# segment_img("./data/talhao_101035/result_hough.tif")
 # segment_img("./data/talhao_101035/result.tif")
 # segment_img("./data/talhao_101035/ground_truth_interest_tci20201015.tif")
 #
+# segment_img("./data/talhao_103330/result_hough.tif")
 # segment_img("./data/talhao_103330/result.tif")
 # segment_img("./data/talhao_103330/ground_truth_interest_tci20201217.tif")
 #
 # segment_img("./data/talhao_102939/result.tif")
+# segment_img("./data/talhao_102939/result_hough.tif")
+# segment_img("./data/talhao_102939/ground_truth_interest_b0420201105.tif")
 
 print("")
 
